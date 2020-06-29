@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta charset="utf-8" />
+	<title>Registration Form</title>
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="styles.css" />
+
+	<style>
+		html {
+			background: url('images/background.jpg') no-repeat;
+			background-size: cover;
+			min-height: 100%;
+		}
+
+		body {
+			background-color: transparent;
+		}
+
+		#registration-form {
+			max-width: 800px;
+			margin: 120px auto;
+		}
+
+		#registration-form .image {
+			float: left;
+			background-image: url('images/desk.jpg');
+			height: 500px;
+			width: 50%;
+			background-size: cover;
+			background-position: 25%;
+		}
+
+		#registration-form .frm {
+			float: right;
+			height: 500px;
+			width: 50%;
+			min-width: 250px;
+			padding: 0 35px;
+			background-size: 100% 100%;
+			background-color: white;
+			overflow: scroll;
+		}
+
+		#registration-form h1 {
+			margin-top: 30px;
+			margin-bottom: 20px;
+		}
+
+		#registration-form .form-control {
+			width: 90%;
+			padding: 12px 20px;
+			height: auto;
+		}
+
+		@media screen and (max-width: 700px) {
+			#registration-form .image {
+				width: 30%;
+				background-position: 60%;
+			}
+
+			#registration-form .frm {
+				width: 70%;
+			}
+
+			#registration-form .form-control {
+				width: 100%;
+			}
+		}
+
+		@media screen and (max-width: 500px) {
+			#registration-form .image {
+				display: none;
+			}
+
+			#registration-form .frm {
+				width: 100%;
+			}
+
+			#registration-form h1 {
+				text-align: center;
+			}
+
+			#registration-form .btn {
+				width: 100%;
+				margin-top: 20px;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container" id="registration-form">
+		<div class="image"></div>
+		<div class="frm">
+			<h1>Registration Form</h1>
+			<form id="contact_form" onsubmit="contact_form(event)">
+				<div class="form-group">
+					<label for="name">First Name</label>
+					<input type="text" class="form-control" data-type="fm_text" placeholder="Enter first name" required
+						name="firstName" />
+				</div>
+				<div class="form-group">
+					<label for="name">Last Name</label>
+					<input type="text" data-type="fm_text" class="form-control" name="lastName"
+						placeholder="Enter last name" required />
+				</div>
+				<div class="form-group">
+					<label for="email">Email</label>
+					<input type="email" data-type="fm_text" class="form-control" name="email" placeholder="Enter email"
+						required />
+				</div>
+				<div class="form-group">
+					<label for="options">Have you completed any course from U-Tech peiviously?</label>
+					Yes
+					<input type="radio" data-type="fm_text" name="previousCourse" value="Yes" required /><span>&nbsp
+						&nbsp</span> No
+					<input type="radio" data-type="fm_text" name="previousCourse" value="No" required />
+				</div>
+				<div class="form-group">
+					<label for="name">School/College Name</label>
+					<input type="text" data-type="fm_text" class="form-control" name="instituation"
+						placeholder="Enter School/College name" required />
+				</div>
+				<div class="form-group">
+					<label for="name">Class</label>
+					<input type="text" data-type="fm_text" class="form-control" name="class" placeholder="Enter Class"
+						required />
+				</div>
+				<div class="form-group">
+					<label for="name">Select to apply for Courses</label><br />
+					<input type="checkbox" value="python programming" />
+					Python Programming <br />
+					<input type="checkbox" value="app development" /> Andriod and iOS App Development
+					<br />
+					<input type="checkbox" value="web development" /> Web Development
+					<br />
+				</div>
+				<div class="form-group">
+					<label for="name">Whatsapp Contact Number</label>
+					<input class="form-control" data-type="fm_text" name="contact" type="tel" placeholder="+92"
+						required />
+				</div>
+				<div class="form-group">
+					<label for="name">Reference (where did you get to know about the course)</label>
+					<input type="text" data-type="fm_text" class="form-control" name="refrence" placeholder="" />
+				</div>
+				<label id="error"></label>
+				<div class="form-group">
+					<input type="submit" class="btn btn-success btn-lg" value="Register" />
+				</div>
+			</form>
+		</div>
+	</div>
+	<script>
+		function contact_form(event) {
+			event.preventDefault();
+			const formBody = {};
+			const input_ref_text = document.querySelectorAll(
+				'input[data-type=fm_text]'
+			);
+
+			const input_ref_check = document.querySelectorAll(
+				'input[type=checkbox]'
+			);
+
+			input_ref_text.forEach((node) => {
+				formBody[node.name] = node.value.toString();
+			});
+			let selectedCourses = [];
+			input_ref_check.forEach((node) => {
+				if (node.checked) {
+					selectedCourses.push(node.value);
+				}
+				return;
+			});
+
+			formBody['selectedCourse'] = selectedCourses.toString();
+
+			fetch('https://utechapi.herokuapp.com/formSubmit', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ formBody: formBody }),
+			}).then((response) => {
+				if (!response.ok) {
+					response.text().then((text) => {
+						if (text.match(/E11000/g)[0] === 'E11000') {
+							document.getElementById('error').style.color = 'red';
+							document.getElementById('error').innerHTML =
+								'Duplicate Entries not allowed!';
+						} else {
+							alert(text);
+						}
+					});
+				} else {
+					document.getElementById('error').style.color = 'green';
+					document.getElementById('error').innerHTML = 'Form Submitted';
+					setTimeout(() => window.location.reload(), 2000);
+				}
+			});
+		}
+	</script>
+</body>
+
+</html>
